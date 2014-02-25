@@ -1,0 +1,42 @@
+function [L1,L2]=P_vecinos(T);
+%Crea los vectores L1 y L2 que me van a servir para moverme por la matriz de coeficientes:
+%L1 es un vector que indica el numero de vecinos de cada elemento de forma acumulada.
+%empezando por el cero L1=(0,1,3,....) L1(i+1)-L1(i) es el numero de
+%vecinos del nodo i. Tiene longitud "m+1",donde "m" es el nº de nodos del
+%sistema.
+%El vector L2 anota qué numeros tienen esos vecinos L2(L1(i)+1:L1(i+1))
+%solo anota los vecinos que son menores o iguales en número, ya que la matriz A es simetrica
+%siempre un nodo es vecino de si mismo y lo colocamos al final
+
+m=max(max(T)); %numero de nodos
+NE=length(T(:,1)); %numero de elementos
+
+L1=zeros(1,m+1);%Creamos el vector L1
+L2(1)=0;
+
+II(1:m)=1; %Es un vector que indica en la posicion i cuantos vecinos tiene el nodo i
+IVNV(1:m,1)=(1:m)'; %Es una matriz que en la fila "i" guarda el numero de los nodos vecinos del "i" 
+
+v=length(T(1,:)); %El numero de nodos de un triangulo (3 1er orden y 6 2ºorden)
+
+for k=1:NE%Para cada elemento (triángulo)
+    for i=1:v%Para cada nodo del elemento
+        n=T(k,i);%Extraemos "n" = número del nodo del elemento "k" en la posición (columna) "i"
+        for j=1:v%Hacemos otro bucle que barra todos los nodos del elemento comparándolos con el "n"
+            if isempty(find(IVNV(n,:)==T(k,j))) & T(k,j)<=n%Comprobamos si el nodo actual "T(k,j)" no está en la matriz "IVNV"; y si es menor o igual que el que estamos contrastando "n"
+                II(n)=II(n)+1;%Contador de columnas de IVNV(n). Se incrementa cada vez que añadimos un nodo al "IVNV(n,:)"
+                IVNV(n,II(n))=T(k,j);%Añadimos el nodo "T(k,j)" a la matriz IVNV(n), en la columna "II(n)"
+            end
+        end
+    end
+end   
+
+%Creacion de los vectores L1 y L2
+for i=1:m
+    L1(i+1)=L1(i)+II(i);    
+    L2(L1(i)+1:L1(i+1))=sort(IVNV(i,1:II(i)));
+end
+
+%Para ver cuantos vecinos tiene el nodo i
+%L1(i+1)-L(i) numero de vecinos
+%El numero de los vecinos L2(L1(i)+1:L1(i+1)) siendo el ultimo el de la diagonal

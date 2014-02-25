@@ -1,0 +1,16 @@
+function [P,T,e]=acondicionar_malla(p,t,e)
+%Acondiciona el vector P(vector nodes) T(vector de triangulos) e(vector de condiciones en la frontera)
+P=p';
+T=t(1:3,:)';
+e=e([5,1,2],:);
+
+%"P" vector de nodos: cada fila representa un nodo, con coordenadas (x,y) en las columnas
+%"T" vector de elementos: cada fila representa un elemento, con nodos componentes en las tres columnas, 
+%ordenados en sentido antihorario
+%"e" vector de segmentos frontera: cada columna representa un segmento; las
+%tres columnas se corresponden con el número de frontera al que pertenece
+%el segm
+%primera fila: numero de frontera
+%segunda fila: primer nodo del vertice del triangulo
+%tercera fila: segundo nodo del vertice del triangulo
+%en la cuarta fila introduciremos los puntos medios si utilizamos elmentos cuadraticos

@@ -1,0 +1,228 @@
+Human Activity Recognition Using Smartphone Sensors
+====================================================
+```{r setoptions, echo=FALSE}
+opts_chunk$set(cache = TRUE, echo = FALSE, results = "hide")
+```
+
+
+Introduction
+------------
+ The Samsung Galaxy S II [1] is a touchscreen-enabled, slate-format Android smartphone designed, developed, and marketed by Samsung Electronics.
+The standard version has dimensions 125.3 x 66.1 x 8.49 mm and weights 116g. 
+
+ The database is built from the recordings of 30 subjects performing activities of daily living (ADL) while carrying a waist-mounted Samsung Galaxy S II smartphone with embedded inertial sensors from the UCI Machine Learning repository[2][3].
+
+ The purpose of this analysis is to build a function that predicts what activity a subject is performing based on the quantitative measurements from the smartphone. 
+ 
+ 
+ 
+Methods
+-------
+
+### Data collection
+ The data are the Samsung activity data available from the Coursera Data Analysis course website [4]. These data were slightly processed to make them easier to load into R. The raw data was obtained in the UCI ML Repository [2]. 
+ The experiments were carried out with a group of 30 volunteers within an age bracket of 19-48 years. Each person performed six activities (WALKING, WALKING\_UPSTAIRS, WALKING\_DOWNSTAIRS, SITTING, STANDING, LAYING) wearing a smartphone (Samsung Galaxy S II) on the waist. Using its embedded accelerometer and gyroscope, 3-axial linear acceleration and 3-axial angular velocity at a constant rate of 50Hz were capture. The experiments were video-recorded to label the data manually. The obtained dataset was randomly partitioned into two sets, where 70% of the volunteers was selected for generating the training data and 30% the test data[3].
+
+ For each record in the dataset it is provided:
+- Triaxial acceleration from the accelerometer (total acceleration) and the estimated body acceleration.
+- Triaxial Angular velocity from the gyroscope.
+- A 561-feature vector with time and frequency domain variables.
+- Its activity label.
+- An identifier of the subject who carried out the experiment.
+
+Attributes | Value
+------------------------ | --------------------------
+Dataset characteristics | Multivariate, Time-Series 
+Number of instances | 7352
+Number of attributes | 561
+Date donated | 2012-12-10
+Associated tasks | Classification, Clustering
+Source | See references[5]
+
+
+### Exploratory analysis and preprocessing
+ All of the columns of the data set (735x563 matrix; except the last two) represents one measurement from the Samsung phone. The variable subject indicates which subject was performing the tasks when the measurements were taken. The variable activity tells what activity they were performing.  
+ For the task of building a classifier, the training set was designed to be the data from subjects 1, 3, 5, and 6 (1315x561 matrix). The test set was the data from subjects 27, 28, 29, and 30 (1485x561 matrix).
+ The sensor signals (accelerometer and gyroscope) were pre-processed by applying noise filters and then sampled in fixed-width sliding windows of 2.56s and 50% overlap (128 readings/window). The sensor acceleration signal, which has gravitational and body motion components, was separated using a Butterworth low-pass filter into body acceleration and gravity. The gravitational force is assumed to have only low frequency components, therefore a filter with 0.3 Hz cutoff frequency was used. From each window, a vector of features was obtained by calculating variables from the time and frequency domain.
+
+ Exploratory analysis was performed inspecting the tables and creating bivariate conditinal plots, histograms, scatterplot matrices, boxplots ad interaction plots.
+ No missing values were found. However, subjects 9 and 10 values were missing. The activity attribute was coerced to be a ordered factor (with 6 levels).
+ No clear candidate variables for performing statistical analyses were found. Therefore, and given the large number of variables, it was decided that dimension reduction was necessary.
+
+ Thus a singular value decomposition was performed on the training set (1315x561). The singular vectors and singualr values were put in decreasing order in left singular vectors, right singular vectors, and a diagonal singular values matrices.
+ Further exploratory analsys were performed on this new transformed data set, focusing naturally on the first singular vectors. 
+ This transformation allowed to see clearly different patterns identifying the activities levels, as can be observed in Figure for the first five left singular vectors.
+ 
+
+### Statistical modeling
+ Based on the insights earned from the exploratory analysis and the dimension reduction, a predictive tree model was fit to a formula with the first 28 left singular vectors as predictive variables and the activities vector as dependent variable.
+ The tree was grown using recursive partitioning using the activities and choosing splits from the left singular vectors. The splits which maximized the reduction in impurity by the deviance criterion were chosen.  
+ Moreover, a 10-fold cross validation was performed to find out the deviance as a function of a cost-complexity parameter by pruning the tree.  Both deviance and the cost-complexity parameter increased with every pruning, thus no pruning was actually performed.
+
+
+### Reproducibility
+ The code for preprocessing data and for generating tables and plots of the exploratory analysis and statistical modeling analysis was embedded in a R Markdown document which contains this same text. However, only this text and a figure are being actually submitted, as required in the assignment description.
+ 
+
+Results
+-------
+ The classification tree fit resulted in a tree with 12 terminals resulting from the splitting of only 8 left singular vector values. These singular vectors were, in order of size of their corresponding singular values: 2, 3, 4, 5, 6, 7, 13, 14. Interestingly, in order of  predictive power, the order was: 2, 4, 13, 3, 6, 5, 7, 14. No other left singular vectors were found to be significantly predictive. 
+
+ In the following table, the classification rates for the trees fit for the first 2, 5, 9, 28 and 99 singular values are shown:
+
+Num. of left SVs | Training set CR | Test set CR
+-----------------|-----------------|-------------
+2  |  0.5535 | 0.6183 
+5  |  0.7165 | 0.7848
+9  |  0.7279 | 0.8586
+28 |  0.7562 | 0.9049
+99 |  0.7562 | 0.9049
+
+
+Conclusions
+-----------
+ The fact that pruning was unnecessary as dictated by the 10-fold cross-validation as a function of cost-complexity parameter indicates that the found left singular vectors were high quality predictors not needing for further refinement. 
+ The classification tree made with splits from the 8 left singular vectors 2, 4, 13, 3, 6, 5, 7, 14 thus showed a classification rate of 90.49% in the training set and of 75.62% in the test set.
+ Taking into account that the benchmark for this 6-level classification is 16.67%, it can be readily concluded that this classification tree based on smartphone measurement variables was highly predictive of the activities the human subjects were doing while carrying the smartphone.
+
+
+References
+----------
+1. Samsung Webpage
+2. University of California Irvine Machine Learning Repository Webage. URL: http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones. Accessed 2013 
+3. Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. Human Activity Recognition on Smartphones using a Multiclass Hardware-Friendly Support Vector Machine. International Workshop of Ambient Assisted Living (IWAAL 2012). Vitoria-Gasteiz, Spain. Dec 2012
+4. Data Analysis by Jeffrey Leek Coursera class Website. URL: https://spark-public.s3.amazonaws.com/dataanalysis/samsungData.rda. Accessed 2013
+5. Jorge L. Reyes-Ortiz, Davide Anguita, Alessandro Ghio, Luca Oneto. Smartlab - Non Linear Complex Systems Laboratory. DITEN - UniversitÃ  degli Studi di Genova, Genoa I-16145, Italy. activityrecognition '@' smartlab.ws, www.smartlab.ws
+
+
+
+```{r load data, echo=FALSE, results="hide"}
+#Loading
+library(knitr)
+library(lattice)
+library(tree)
+library(boot)
+load("samsungData.rda")
+s <- samsungData
+
+# Removing incomplete cases, adding useful attributes
+#s <- complete.cases(s) #sum(is.na(s))=0: no NAs found
+hist(s$subject)  # no values for 9,10
+s[[563]]<-factor(s[[563]],ordered=1) #coercing activities to factor
+nac <- as.numeric(trs$activity)
+
+# Splitting the dataset
+trs <- s[s$subject %in% c(1,3,5,6),]
+tes <- s[s$subject %in% c(27,28,29,30),]
+```
+
+```{r fiddle, cache=TRUE, results="hide"}
+
+#Exploring
+#str(s); names(s)
+trs1 <- trs[trs$subject==1,]
+trs3 <- trs[trs$subject==3,]
+#sum("numeric"==sapply(s,class)) --> 561
+stripplot(trs1[,1] ~ trs1[,23])
+barchart(trs1[,1] ~ trs1[,45])
+# conditional plots
+coplot(trs1[,1] ~ trs1[,2] | trs1$activity)
+xyplot(trs1[,1] ~ trs1[,5] | trs1$activity)
+plot(trs1[,1],trs1[,2])
+interaction.plot(trs1[,1], trs1$activity,trs1[,3])
+boxplot(trs1[,1] ~ trs1[,2])
+bwplot(trs1[,78] ~ trs1[,56] | trs1$activity)
+
+# Dimension reduction
+sdo <- svd(trs[c(-562,-563)]) 
+sds <- svd(scale(trs[c(-562,-563)]))
+dio <- dist(trs[c(-562,-563)]); dio[2] <- dist(sdo$u[c(-562,-563)]); dio[3] <- dis(sdo$u[c(-562,-563)]%*%diag(sdo$d) )
+hco <- hclust(dio[1]); hco[2] <- hclust(dio[2]); hco[3] <- hclust(dio[3]) 
+kmo <- kmeans(trs[c(-562,-563)],centers=nlevels(trs$activity))
+kmo[2] <- kmeans(sdo$u[c(-562,-563)],centers=nlevels(trs$activity))
+
+# SVD: trs = sdo$u %*% diag(sdo$d) %*% t(sdo$v)
+#      trs %*% sdo$v = sdo$u %*% diag(sdo$d)
+# Singular vectors 
+# sdo$u[,1] %*% t(sdo$v[,1]) * sdo$d[1]
+par(mfcol=c(2,3))
+plot(sdo$u[,1],xlab="Samples",ylab="First left SVe",pch=1,col=nac)
+plot(sds$u[,1],xlab="Samples",ylab="First left SVe",pch=1,col=nac)
+plot(sdo$u[,1]*sdo$d[1],xlab="Samples",ylab="First left SVe * SVa",pch=1,col=nac)
+plot(sds$u[,1]*sdo$d[1],xlab="Samples",ylab="First left SVe * SVa",pch=1,col=nac)
+plot(sdo$v[,1],xlab="Attributes",ylab="First right SVe",pch=1,col=nac)
+plot(sds$v[,1],xlab="Attributes",ylab="First right SVe",pch=1,col=nac)
+# Singular values
+par(mfrow=c(2,2))
+plot(sdo$d[1:4],xlab="Attributes",ylab="Singular values")
+plot(sdo$d[1:4]^2/sum(sdo$d^2),xlab="Attributes",ylab="Relative variance explained")
+plot(sds$d[1:4],xlab="Attributes",ylab="Singular values")
+plot(sds$d[1:4]^2/sum(sds$d^2),xlab="Attributes",ylab="Relative variance explained")
+
+u1 <- sdo$u[,1];   v1 <- sdo$v[,1];   ud1 <- sdo$u[,1]    *  sdo$d[1]
+u2 <- sdo$u[,1:5]; v2 <- sdo$v[,1:2]; ud2 <- sdo$u[,1:2] %*% diag(sdo$d[1:2])
+u5 <- sdo$u[,1:5]; v5 <- sdo$v[,1:5]; ud5 <- sdo$u[,1:5] %*% diag(sdo$d[1:5])
+u9 <- sdo$u[,1:9]; v9 <- sdo$v[,1:9]; ud9 <- sdo$u[,1:9] %*% diag(sdo$d[1:9])
+u28 <- sdo$u[,1:28]; v28 <- sdo$v[,1:28]; ud28 <- sdo$u[,1:28] %*% diag(sdo$d[1:28])
+u99 <- sdo$u[,1:99]; v99 <- sdo$v[,1:99]; ud99 <- sdo$u[,1:99] %*% diag(sdo$d[1:99])
+pairs(ud5,col=nac)
+splom(~ud5,col=nac) # ~u | trs$subject or col=trs$subject
+plot(u5[,1], u5[,2], col=nac)  #dotchart(u[,1])
+hist(u5[,1])
+coplot(u5[,1]~u5[,2] | trs$activity, col=nac)
+boxplot(u5[,1]~trs$activity) # bwplot(u[,1]~u[,2] | trs$activity)
+interaction.plot(u5[,1], trs$activity,u5[,2])
+qqplot(u5[,1],u5[,2], col=nac)
+sunflowerplot(u5[,1] ~ u5[,2],col=nac)
+
+# Fitting predictive function 
+pf <- glm(trs$activity ~ u5[,1] + u5[,2],family="multinomial")
+#summary, anova, effects, proj, vcov, coef, family, plot, residuals
+#family(lmf); coef(lmf)
+#avt <- anova(lmf); print(avt); plot(lmf);vcov(lmf)
+trac <- trs$activity
+teac <- tes$activity
+pf1 <- tree(trac ~ .,data=data.frame(ud1))
+pf2 <- tree(trac ~ .,data=data.frame(ud2))
+pf5 <- tree(trac ~ .,data=data.frame(ud5)) 
+pf9 <- tree(trac ~ .,data=data.frame(ud9))
+pf28 <- tree(trac ~ .,data=data.frame(ud28))
+pf99 <- tree(trac ~ .,data=data.frame(ud99))
+summary(pf28)
+# K-fold CV to find out deviance as a function of cost-complexity parameter k. Both deviance and k increase with pruning always here, thus no pruning is needed
+plot(cv.tree(pf28)) 
+
+# Computing transformed test data 
+# model: tes %*% sdo$v ~ sdo$u %*% diag(sdo$d)
+tv <- as.matrix(tes[,c(-562,-563)]) %*% sdo$v
+tv1<-tv[,1]; tv2<-tv[,1:2]; tv5<-tv[,1:5]; tv9<-tv[,1:9];
+tv28<-tv[,1:28]; tv99<-tv[,1:99];
+
+# Predicting
+trp <- predict(pf99, newdata = data.frame(ud99)); summary(trp)
+tep <- predict(pf99, newdata = data.frame(tv99)); summary(tep)
+trpa <- apply(trp,1,sort.list)[nlevels(trac),]
+tepa <- apply(tep,1,sort.list)[nlevels(trac),]
+# Calculate prediction accuracy
+tracc <- mean(as.numeric(trac)==trpa)
+teacc <- mean(as.numeric(teac)==tepa)
+table(trac,trpa)
+table(teac,tepa)
+
+# Plotting figure
+palette() # to see coor palette of col
+par(mfcol=c(2,2))
+plot(sdo$u[,1],xlab="Samples",ylab="First left SVe",pch=1,col=nac)
+plot(sdo$u[,1]*sdo$d[1],xlab="Samples",ylab="First left SVe * SVa",pch=1,col=nac)
+plot(sdo$v[,1],xlab="Attributes",ylab="First right SVe",pch=1,col=nac)
+plot(sds$v[,1],xlab="Attributes",ylab="First right SVe",pch=1,col=nac)
+pairs(ud5,col=nac)
+splom(~u5,
+      col=nac,
+      varnames=c(1,2,3,4,5),
+      main="First five singular vectors scatter plot matrix",
+      xlab="Figure") 
+```
+
+
+
