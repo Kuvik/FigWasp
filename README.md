@@ -9,7 +9,7 @@ E5_3
 
 PA2
  R markdown file and figures.
- Project analyzing cinematic data from a Samsung smartphone accelerometer and gyroscopes.
+ Project analyzing kinematic data from a Samsung smartphone accelerometer and gyroscopes.
  The main file is harusp.Rmd
 
 P_eliptico_alumno
