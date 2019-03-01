@@ -17,6 +17,6 @@ P_eliptico_alumno
 
 coursera1_hmm
  Natural language processing project
- nlp_hmm.py implements the Viterbi algorithm for ahidden Markov model
+ nlp_hmm.py implements the Viterbi algorithm for a hidden Markov model
 
 
