@@ -1,7 +1,7 @@
 Fig Wasp
 --------
 
-Some random code
+Sundry code
 
 E5_3
  Matlab code for a visual presentation task of psychophysics adjusting screen stimulus features to input
